@@ -3,32 +3,24 @@ from flask import Flask, request
 import pickle
 import os
 
+
 with open('lr_clf.pickle', 'rb') as pfile:
     clf_loaded = pickle.load(pfile)
 
-def url_to_x_test(params):
-    split_params = params.split('&')
-    df = pd.DataFrame({value.split('=')[0]: [value.split('=')[1]] for value in split_params})
-    return df
+COLUMNS = ['State_FIPS', '116th_Congressional_District', '2017_NAICS_Code',
+           'Number_of_Establishments', 'Employment', 'Employment_Noise_Flag',
+           '1st_Quarter_Payroll_Noise_Flag', 'Annual_Payroll_Noise_Flag']
 
 
 app = Flask(__name__)
 
+
 # client
-@app.route('/predict_single/<params>', methods=['GET'])
-def predict_single(params):
-    """receives a url filled with all parameters,
-    decoded for proper linear regression object expectations,
-    sent to predict, one line at a time"""
-
-    '''
-    try the following:
-    http://127.0.0.1:5000/predict_single/State_FIPS=02&116th_Congressional_District=5.0&2017_NAICS_Code=41&Number_of_Establishments=800&Employment=6128 
-    &Employment_Noise_Flag=1&1st_Quarter_Payroll_Noise_Flag=1&Annual_Payroll_Noise_Flag=1
-    '''
-
-    X = url_to_x_test(params)
-    return f'{clf_loaded.predict(X)[0].round():,}'
+@app.route('/predict_single', methods=['GET'])
+def predict_single():
+    df = pd.DataFrame( columns=COLUMNS)
+    df.loc[0, :] = [float(request.args[col]) for col in COLUMNS]
+    return f'{clf_loaded.predict(df)[0].round():,}'
 
 
 # client
@@ -54,4 +46,4 @@ if __name__ == '__main__':
     else:
         # 'PORT' variable doesn't exist, running not on Heroku, presumabely running locally, run with default
         #   values for Flask (listening only on localhost on default Flask port)
-        app.run()
+        app.run(port=5000)
