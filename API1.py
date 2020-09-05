@@ -1,7 +1,7 @@
-import pandas as pd
 from flask import Flask, request
 import pickle
 import os
+import pandas as pd
 
 
 with open('lr_clf.pickle', 'rb') as pfile:
