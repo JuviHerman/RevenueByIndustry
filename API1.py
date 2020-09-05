@@ -18,7 +18,7 @@ app = Flask(__name__)
 # client
 @app.route('/predict_single', methods=['GET'])
 def predict_single():
-    df = pd.DataFrame( columns=COLUMNS)
+    df = pd.DataFrame(columns=COLUMNS)
     df.loc[0, :] = [float(request.args[col]) for col in COLUMNS]
     return f'{clf_loaded.predict(df)[0].round():,}'
 
